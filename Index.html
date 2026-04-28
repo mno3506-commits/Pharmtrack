@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PharmTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const cfg = {
+  apiKey:"AIzaSyA8CohvkRhguYcaK3YEKblg1AN3P5FsQ3s",
+  authDomain:"pharmtrack-73f0b.firebaseapp.com",
+  projectId:"pharmtrack-73f0b",
+  storageBucket:"pharmtrack-73f0b.firebasestorage.app",
+  messagingSenderId:"179496315043",
+  appId:"1:179496315043:web:6ec7e98339d0e0f4f4b716"
+};
+const app = initializeApp(cfg);
+const db = getFirestore(app);
+window.db = db;
+window.fb = { collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp, getDoc, setDoc };
+window.firebaseReady = true;
+window.dispatchEvent(new Event('firebaseReady'));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>emailjs.init("I3AwQ2AURfxkRWD7C");</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060e1a;--c1:#0a1628;--c2:#0f1f35;--c3:#162840;--c4:#1d3350;--teal:#0d9488;--teal2:#14b8a6;--blue:#3b82f6;--gold:#f59e0b;--red:#ef4444;--green:#22c55e;--purple:#a855f7;--white:#e8f4fd;--muted:#527a96;--slate:#7aa0b8;--bdr:#162840}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;overflow-x:hidden}
+#lp{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 20% 20%,rgba(13,148,136,0.12),transparent 60%),var(--bg)}
+.lic{width:60px;height:60px;background:linear-gradient(135deg,var(--teal),#0a6b62);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 10px}
+.lt{font-size:26px;font-weight:900;background:linear-gradient(135deg,var(--teal2),#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ls{font-size:12px;color:var(--muted);margin-top:4px;text-align:center}
+.lcard{background:var(--c2);border:1px solid rgba(13,148,136,0.15);border-radius:20px;padding:26px;width:100%;max-width:380px;margin-top:20px}
+.ltabs{display:flex;gap:3px;background:var(--c1);border-radius:10px;padding:3px;margin-bottom:20px}
+.ltab{flex:1;padding:8px;border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;color:var(--muted);background:transparent}
+.ltab.act{background:var(--teal);color:white}
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px}
+.fi{width:100%;padding:11px 14px;background:var(--bg);border:1.5px solid var(--bdr);border-radius:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:14px;outline:none}
+.fi:focus{border-color:var(--teal)}
+.fi::placeholder{color:var(--muted)}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+.rb{padding:10px 8px;border:1.5px solid var(--bdr);border-radius:10px;background:transparent;font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px}
+.rb .ri{font-size:20px}
+.rb.sel{border-color:var(--teal);background:rgba(13,148,136,0.1);color:var(--teal2)}
+.lbtn{width:100%;padding:13px;background:linear-gradient(135deg,var(--teal),#0a6b62);border:none;border-radius:11px;color:white;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px}
+.err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:9px 12px;font-size:11px;color:#fca5a5;margin-bottom:12px;display:none}
+.err.on{display:block}
+</style>
+</head>
+<body>
+<div id="lp">
+  <div class="lic">💊</div>
+  <div class="lt">PharmTrack</div>
+  <div class="ls">نظام إدارة طلبات الصيدلية</div>
+  <div class="lcard">
+    <div class="ltabs">
+      <button class="ltab act" onclick="swTab('li')" id="t-li">تسجيل دخول</button>
+      <button class="ltab" onclick="swTab('re')" id="t-re">حساب جديد</button>
+    </div>
+    <div id="em" class="err"></div>
+    <div id="li-f">
+      <div class="fg"><label class="fl">رقم البادج</label><input class="fi" id="li-b" type="number" placeholder="أدخل رقم البادج..." /></div>
+      <button class="lbtn" onclick="doLogin()">دخول ←</button>
+    </div>
+    <div id="re-f" style="display:none">
+      <div class="fg"><label class="fl">الاسم الكامل</label><input class="fi" id="re-n" placeholder​​​​​​​​​​​​​​​​
